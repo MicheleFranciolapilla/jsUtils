@@ -1,0 +1,17 @@
+{
+  "name": "@mf-coolcode/jsutils",
+  "version": "1.0.0",
+  "description": "General-purpose JavaScript utilities with full type definitions. Tree-shakeable and compatible with CommonJS, ESM, and browser bundlers.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.11.1",
+  "devDependencies": {
+    "jest": "^30.0.4",
+    "tsup": "^8.5.0"
+  }
+}
