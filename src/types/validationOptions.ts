@@ -15,5 +15,3 @@ export interface ObjectValidationOptions
     requiredProperties? : string[];
     minProperties?      : number;
 }
-
-// module.exports = { NumberValidationOptions, ArrayValidationOptions, ObjectValidationOptions }

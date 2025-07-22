@@ -1,5 +1,3 @@
-// const { NumberValidationOptions, ArrayValidationOptions, ObjectValidationOptions } = require('./types/validationOptions');
-
 import type { NumberValidationOptions, ArrayValidationOptions, ObjectValidationOptions } from './types/validationOptions';
 
 /** @typedef {import('./types/validationOptions').NumberValidationOptions} NumberValidationOptions */
@@ -156,4 +154,4 @@ const deepFreeze = (objToFreeze : unknown) : unknown =>
     return Object.freeze(objToFreeze);
 };
 
-module.exports = { isNotNull, isDefined, isAValidNumber, isAValidArray, isAValidObjectKey, isAValidObject, cloneObject, deepFreeze }
+export { isNotNull, isDefined, isAValidNumber, isAValidArray, isAValidObjectKey, isAValidObject, cloneObject, deepFreeze }
