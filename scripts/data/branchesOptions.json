@@ -1,0 +1,58 @@
+[
+    {
+        "branch"        :   "source",
+        "clearBefore"   :   true,
+        "preserve"      :   [ ".git" ],
+        "copy"          :   [
+                                "src/",
+                                ".gitignore",
+                                "jest.config.js",
+                                "package.json",
+                                "pnpm-lock.yaml",
+                                "tsconfig.dev.json",
+                                "tsconfig.build.json",
+                                "tsup.config.ts"
+                            ],
+        "filesContent"  :   [
+                                {
+                                    "file"      :   ".gitignore",
+                                    "content"   :   "node_modules/"  
+                                },
+                                {
+                                    "file"      :   "package.json",
+                                    "content"   :   {
+                                                        "remove"    :   [
+                                                                            "scripts.build:local",
+                                                                            "scripts.release"
+                                                                        ] 
+                                                    } 
+                                }
+                            ]
+    },
+    {
+        "branch"        :   "release",
+        "clearBefore"   :   true,
+        "preserve"      :   [ ".git" ],
+        "copy"          :   [
+                                ".gitignore",
+                                "package.json"
+                            ],
+        "filesContent"  :   [
+                                {
+                                    "file"      :   ".gitignore",
+                                    "content"   :   "node_modules/"  
+                                },
+                                {
+                                    "file"      :   "package.json",
+                                    "content"   :   {
+                                                        "remove"    :   [
+                                                                            "scripts",
+                                                                            "devDependencies",
+                                                                            "packageManager"
+                                                                        ] 
+                                                    } 
+                                }
+                            ],
+        "run"           :   [ "pnpm build:local" ] 
+    }
+]

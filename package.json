@@ -17,7 +17,7 @@
     "test": "jest",
     "build": "tsup --config tsup.config.ts",
     "build:local": "tsup --config tsup.local.config.ts",
-    "build:release": "pnpm build:local && powershell -ExecutionPolicy Bypass -File ./scripts/powershell/commit-release.ps1"
+    "release": "node ./scripts/releaseVersion.js"
   },
   "keywords": [],
   "author": "Michele Franciolapilla",
