@@ -11,7 +11,7 @@ module.exports =
                                           ]
     },
   
-  testMatch             : ['**/*.test.js'],
+  testMatch             : ['**/__tests__/**/*.test.js'],
   
   moduleFileExtensions  : ['ts', 'js', 'json']
 };

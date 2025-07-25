@@ -1,5 +1,5 @@
 // @ts-ignore
-const { isNotNull, isDefined, isAValidNumber, isAValidArray, isAValidObjectKey, isAValidObject, cloneObject, deepFreeze } = require('./index');
+const { isNotNull, isDefined, isAValidNumber, isAValidArray, isAValidObjectKey, isAValidObject, cloneObject, deepFreeze } = require('../index');
 
 const randomBool = () => Math.random() < 0.5;
 

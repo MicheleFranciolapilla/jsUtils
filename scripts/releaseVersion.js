@@ -221,7 +221,7 @@ const commitAndTag = () =>
         const branchFolder = join(root, worktreeFolder, branch);
         const tagStr = `v${version}${(branch === 'source') ? '-src' : ''}`;
         runCommand(`git -C "${branchFolder}" add .`);
-        const { someError, error } = runCommand(`git -C "${branchFolder}" commit -m "${(branch === 'source') ? '📦 Source' : '🚀 Binary'} release ${tagStr}"`);
+        const { someError, error } = runCommand(`git -C "${branchFolder}" commit -m "${(branch === 'source') ? '📦 Source' : '🚀 Compiled'} release ${tagStr}"`);
         if (someError)
         {
             // @ts-ignore
