@@ -5,189 +5,288 @@ const { execSync } = require('child_process');
 const branchesOptions = require('./data/branchesOptions.json');
 
 const root = resolve(__dirname, '../');
-const allowedBranches = [ 'source', 'release' ];
+const packagePath = join(root, 'package.json');
 const worktreeFolder = '../gitWorktrees/jsUtils';
-
-const isForced = process.argv.includes('--force');
+const execStdIO = 'inherit';
 let version = '';
+let tagExistsInSource;
+let tagExistsInRelease;
 
-let errorIndex = -1;
+/** @type {string[]} Branches allowed for processing */
+const allowedBranches = [ 'source', 'release' ];
 
-const errorMsg = (index) =>
-{
-    const errorMsgs = 
-    [
-        '❌ File [ package.json ] not found! The current script must be located into a subfolder of the root folder.',
-        '❌ The file [ package.json ] is not a valid JSON file!',
-        '❌ The file [ package.json ] does not have a valid field [ version ] (format: x.y.z where x,y,z are integer)',
-        `❌ The tag ${version}-src is already defined in [ source ] branch`,
-        `❌ The tag ${version} is already defined in [ release ] branch`,
-    ];
-    console.error(errorMsgs[index]);
-}
+/** @type {boolean} Whether the script is forced (ignores existing tags) */
+const isForced = process.argv.includes('--force');
 
-const isAValidVersion = (version) => 
-{
-    if (!version || (typeof version !== 'string'))
-        return false;
-    const splitted = version.split('.');
-    if ((splitted.length !== 3) || splitted.some( (versionItem) => (versionItem !== parseInt(versionItem).toString())))
-        return false;
-    return true;
-}
-
-const isANewTag = (tag) =>
+/**
+ * Executes a shell command synchronously.
+ * @param {string} command - The shell command to execute.
+ * @returns {{ someError: boolean, outcome?: Buffer, error?: Error }}
+ */
+const runCommand = (command) =>
 {
     try
     {
-        execSync(`git rev-parse --verify --quiet "refs/tags/${tag}"`, { stdio : 'inherit' });
-        return false;
+        const outcome = execSync(command, { stdio : execStdIO });
+        return { someError : false, outcome };
     }
-    catch
+    catch (error)
     {
-        return true;
+        return { someError : true, error }
     }
 }
 
-const clearFolder = (folder, itemsToPreserve = []) =>
+/**
+ * Checks if the given Git tag does NOT exist.
+ * @param {string} tag - The Git tag to check.
+ * @returns {boolean} True if the tag does not exist (i.e. it's new).
+ */
+const isANewTag = (tag) => runCommand(`git rev-parse --verify --quiet "refs/tags/${tag}"`).someError;
+
+/**
+ * Deletes a Git tag locally and remotely.
+ * @param {string} tag - The Git tag to delete.
+ * @returns {{ someError: boolean, outcome?: Buffer, error?: Error }}
+ */
+const clearTag = (tag) => runCommand(`git tag -d ${tag} && git push --delete origin ${tag}`);
+
+/**
+ * Retrieves and validates the version string from package.json.
+ * @returns {{ someError: boolean, errorMsg?: string }}
+ */
+const retrieveVersion = () =>
 {
-    fs.readdirSync(folder).forEach( (item) =>
+    let errorIndex = 0;
+    try
+    {
+        const pkgContent = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
+        version = pkgContent.version;
+        if (!version || (typeof version !== 'string') || (version.split('.').length !== 3) || version.trim().split('.').some( (versionItem) => (versionItem !== parseInt(versionItem).toString())))
         {
-            const itemFullPath = join(folder, item);
-            const statItem = fs.statSync(itemFullPath);
-            if ((statItem.isFile() && !itemsToPreserve.includes(item)) || (statItem.isDirectory() && !itemsToPreserve.includes(`${item}/`)))
+            errorIndex++;
+            throw new Error('❌ The file [ package.json ] does not have a valid string field [ version ] (format: x.y.z where x,y,z are integer)');
+        }
+        version = version.trim();
+        return { someError : false };
+    }
+    catch (error)
+    {
+        return { someError : true, errorMsg : (errorIndex === 0) ? '❌ The file [ package.json ] is not a valid JSON file!' : error.message }
+    }
+}
+
+/**
+ * Clears a folder, preserving specific items if provided.
+ * @param {string} folder - The folder path to clear.
+ * @param {string[]} [itemsToPreserve=[]] - Files/folders to preserve.
+ */
+const clearFolder = (folder, itemsToPreserve = []) => 
+    (fs.existsSync(folder) && fs.statSync(folder).isDirectory())
+    ?   fs.readdirSync(folder).forEach( (item) =>
             {
-                try
+                const itemFullPath = join(folder, item);
+                const statItem = fs.statSync(itemFullPath);
+                if ((statItem.isFile() && !itemsToPreserve.includes(item)) || (statItem.isDirectory() && !itemsToPreserve.includes(`${item}/`)))
                 {
-                    fs.rmSync(itemFullPath, { recursive : true });
+                    try
+                    {
+                        fs.rmSync(itemFullPath, { recursive : true });
+                    }
+                    catch (error)
+                    {
+                        throw error;
+                    }
                 }
-                catch
+            })
+    :   (() => { throw new Error(`The directory [ ${folder} ] does not exist`) })();
+
+/**
+ * Copies selected items from source to destination folder.
+ * @param {string} sourceFolder - The origin folder.
+ * @param {string} destinationFolder - The target folder.
+ * @param {string[]} itemsToCopy - List of files/directories to copy.
+ */
+const copyItems = (sourceFolder, destinationFolder, itemsToCopy) => 
+    (fs.existsSync(sourceFolder) && fs.statSync(sourceFolder).isDirectory())
+    ?   ((fs.existsSync(destinationFolder) && fs.statSync(destinationFolder).isDirectory())
+        ?   fs.readdirSync(sourceFolder).forEach( (item) =>
                 {
-                    // Gestire l'errore
-                }
-            }
-        });
-}
+                    const itemFullPath = join(sourceFolder, item);
+                    const statItem = fs.statSync(itemFullPath);
+                    if ((statItem.isFile() && itemsToCopy.includes(item)) || (statItem.isDirectory() && itemsToCopy.includes(`${item}/`)))
+                    {
+                        try
+                        {
+                            fs.cpSync(itemFullPath, join(destinationFolder, item), { recursive : true, force : true });
+                        }
+                        catch (error)
+                        {
+                            throw error;
+                        }
+                    }
+                })
+        :   (() => { throw new Error(`The directory [ ${destinationFolder} ] does not exist`) })())
+    :   (() => { throw new Error(`The directory [ ${sourceFolder} ] does not exist`) })();
 
-const copyItems = (sourceFolder, destinationFolder, itemsToCopy) =>
+/**
+ * Scans and processes branch options from branchesOptions.json
+ * (clearing, copying, modifying files, running commands).
+ * @throws Will throw if config is missing or invalid.
+ */
+const scanOptions = () =>
 {
-    fs.readdirSync(sourceFolder).forEach( (item) =>
-        {
-            const itemFullPath = join(sourceFolder, item);
-            const statItem = fs.statSync(itemFullPath);
-            if ((statItem.isFile() && itemsToCopy.includes(item)) || (statItem.isDirectory() && itemsToCopy.includes(`${item}/`)))
-                fs.cpSync(itemFullPath, join(destinationFolder, item), { recursive : true, force : true });
-        });
-}
-
-const commitWithTag = (branch) =>
-{
-    const branchObj = branchesOptions.find( (obj) => (obj.branch === branch));
-    if (branchObj)
+    for (const branch of allowedBranches)
     {
+        const branchObj = branchesOptions.find( (obj) => (obj.branch === branch));
+        if (!branchObj || (typeof branchObj !== 'object'))
+            throw new Error('File [ ./data/branchesOptions.json ] corrupted!');
+        console.log(`🚧 Preparing branch [ ${branch} ]`);
         const branchFolder = join(root, worktreeFolder, branch);
-        if (branchObj.clearBefore)
-            clearFolder(branchFolder, branchObj.preserve);
-        if (branchObj.copy.length !== 0)
-            copyItems(root, branchFolder, branchObj.copy);
-        branchObj.filesContent.forEach( (fcObj) =>
-            {
-                const currentFile = join(branchFolder, fcObj.file);
-                if (fs.existsSync(currentFile))
+        const { clearBefore, preserve, copy, filesContent, run } = branchObj;
+        if (clearBefore === true)
+        {
+            console.log(`🛠️  Cleaning folder`);
+            clearFolder(branchFolder, preserve ?? []);    
+            console.log(`✔️  Folder cleaned!`);    
+        }
+        if (copy && Array.isArray(copy) && copy.length !== 0)
+        {
+            console.log(`🛠️  Copying files`);
+            copyItems(root, branchFolder, copy);
+            console.log(`✔️  Files copied!`);
+        }
+        if (filesContent && Array.isArray(filesContent))
+        {
+            filesContent.forEach( (fcObj) => 
                 {
+                    console.log(`🛠️  Updating [ ${fcObj.file} ]`);
+                    const currentFile = join(branchFolder, fcObj.file);
+                    if (!fs.existsSync(currentFile))
+                        throw new Error(`The file [ ${currentFile} ] is defined in the field [ filesContent ] but does not exist in the related branch [ ${branch} ]!`);
                     if (typeof fcObj.content === 'string')
                         fs.writeFileSync(currentFile, fcObj.content);
                     else if (fcObj.content && (typeof fcObj.content === 'object'))
                     {
-                        const jsonContent = JSON.parse(fs.readFileSync(currentFile, 'utf8'));
                         const { remove } = fcObj.content;
+                        const jsonContent = JSON.parse(fs.readFileSync(currentFile, 'utf8'));
                         if (remove && Array.isArray(remove))
                         {
-                            try
-                            {
-                                remove.forEach( (field) => 
+                            remove.forEach( (field) =>
+                                {
+                                    if (field.includes('.'))
                                     {
-                                        if (field.includes('.'))
-                                        {
-                                            const keys = field.split('.');
-                                            const lastKey = keys.pop();
-                                            const parent = keys.reduce( (obj, key) => obj?.[key], jsonContent);
-                                            if (parent)
-                                                // @ts-ignore
-                                                delete parent[lastKey];
-                                        }
-                                        else
-                                            delete jsonContent[field];
-                                    });
-                            }
-                            catch
-                            {
-                                // Gestire l'errore di parsing
-                            }
+                                        const keys = field.split('.');
+                                        const lastKey = keys.pop();
+                                        const parent = keys.reduce( (obj, key) => obj?.[key], jsonContent);
+                                        if (parent)
+                                            // @ts-ignore
+                                            delete parent[lastKey];
+                                    }
+                                    else
+                                        delete jsonContent[field];
+                                });
+                            fs.writeFileSync(currentFile, JSON.stringify(jsonContent, null, 2));
                         }
-                        fs.writeFileSync(currentFile, JSON.stringify(jsonContent, null, 2) + '\n');
                     }
-                }
-                // Gestire la non esistenza del file con errore
-            });
-        const { run } = branchObj;
+                    console.log(`✔️  File [ ${fcObj.file} ] updated!`);
+                });
+        }
         if (run && Array.isArray(run))
-            run.forEach( (code) => execSync(code, { stdio : 'inherit' }));
-        const tagStr = `v${version}${(branch === 'source') ? '-src' : ''}`;
-        console.log("QUI ", tagStr)
-        console.log("BRANCH FOLDER.... ", branchFolder)
-        execSync(`git -C "${branchFolder}" add .`, { stdio : 'inherit' });
-        console.log("add fatto")
-        execSync(`git -C "${branchFolder}" commit -m "${(branch === 'source') ? '📦 Source' : '🚀 Binary'} release ${tagStr}"`, { stdio : 'inherit' });
-        console.log("commit fatto")
-        // Gestire il nothing to commit
-        execSync(`git -C "${branchFolder}" tag ${tagStr}`, { stdio : 'inherit' });
-        execSync(`git -C "${branchFolder}" push origin ${branch}`, { stdio : 'inherit' });
+            run.forEach( (command) => 
+                {
+                    console.log(`🛠️  Running script [ ${command} ]`);
+                    const { someError, error } = runCommand(command);
+                    if (someError)
+                        throw error;
+                    else
+                        console.log(`✔️  Script [ ${command} ] ran!`);     
+                });
+        console.log(`👍 Branch [ ${branch} ] prepared!`);
     }
-    // Gestire l'errore in caso di inesistenza
 }
 
-try
+/**
+ * Commits changes in all branches, creates Git tags and pushes to remote.
+ * Reverts commits if any tagging operation fails.
+ */
+const commitAndTag = () =>
 {
-    const packagePath = join(root, 'package.json');
-    errorIndex++;
-    if (!fs.existsSync(packagePath))
-        throw new Error();
-    errorIndex++;
-    const packageContent = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
-    errorIndex++;
-    version = packageContent.version.trim();
-    if (!isAValidVersion(version))
-        throw new Error();
-    errorIndex++;
-    const tagExistsInSource = !isANewTag(`v${version}-src`);
-    if (!isForced && tagExistsInSource)
-        throw new Error();
-    errorIndex++;
-    const tagExistsInRelease = !isANewTag(`v${version}`);
-    if (!isForced && tagExistsInRelease)
-        throw new Error();
-    if (tagExistsInSource) 
-    {
-        execSync(`git tag -d v${version}-src`, { stdio : 'inherit' });
-        execSync(`git push --delete origin v${version}-src`, { stdio : 'inherit' })
-    }
-    if (tagExistsInRelease)
-    {
-        execSync(`git tag -d v${version}`, { stdio : 'inherit' });
-        execSync(`git push --delete origin v${version}`, { stdio : 'inherit' })
-    }
+    const committedBranches = [];
+    let canPushTag = true;
     for (const branch of allowedBranches)
     {
-        const outcome = commitWithTag(branch);
+        console.log(`🛠️  Staging / Committing / Pushing changes for the branch [ ${branch} ]`);
+        if (!canPushTag)
+            break;
+        const branchFolder = join(root, worktreeFolder, branch);
+        const tagStr = `v${version}${(branch === 'source') ? '-src' : ''}`;
+        runCommand(`git -C "${branchFolder}" add .`);
+        const { someError, error } = runCommand(`git -C "${branchFolder}" commit -m "${(branch === 'source') ? '📦 Source' : '🚀 Binary'} release ${tagStr}"`);
+        if (someError)
+        {
+            // @ts-ignore
+            console.log(`❌ ${error.message}`);
+            canPushTag = false;
+        }
+        else
+        {
+            runCommand(`git -C "${branchFolder}" push origin ${branch}`);
+            console.log(`✔️  Done!`);
+            committedBranches.push(branch);
+        }
     }
-    execSync(`git push --tags`, { stdio : 'inherit' })
-}
-catch
-{
-    if (errorIndex >= 0)
+    if (canPushTag)
     {
-        errorMsg(errorIndex);
-        process.exit(1);
+        for (const branch of allowedBranches)
+        {
+            console.log(`🛠️  Tagging branch [ ${branch} ]`);
+            const branchFolder = join(root, worktreeFolder, branch);
+            const tagStr = `v${version}${(branch === 'source') ? '-src' : ''}`;
+            if (((branch === 'source') && tagExistsInSource) || ((branch === 'release') && tagExistsInRelease))
+            {
+                console.log(`🛠️  Forcing existing tag [ ${tagStr} ] clearing`);
+                clearTag(tagStr);
+            }
+            console.log(`🛠️  Tagging [ ${tagStr} ]`);
+            runCommand(`git -C "${branchFolder}" tag ${tagStr}`);
+            console.log(`✔️  Branch [ ${branch} ] tagged!`);
+        }
+        console.log(`🛠️  Pushing tags to remote repo`);
+        runCommand(`git push --tags`);
+        console.log(`✔️  Remote repo updated!`);
     }
+    else
+        for (const branch of committedBranches)
+        {
+            console.log(`🛠️  Resetting commit for branch [ ${branch} ]`);
+            const branchFolder = join(root, worktreeFolder, branch); 
+            runCommand(`git -C "${branchFolder}" reset --hard HEAD~1`);
+            runCommand(`git -C "${branchFolder}" push origin HEAD --force`);
+            console.log(`✔️  Done!`);
+        }
 }
+
+/**
+ * Main function that orchestrates the release process.
+ * @throws Will throw if prerequisites or Git operations fail.
+ */
+const scriptExecutor = () =>
+{
+    console.log('⚙️ New version release process starts');
+    if (!fs.existsSync(packagePath))
+        throw new Error('❌ File [ package.json ] not found! The current script must be located into a subfolder of the root folder.');
+    const { someError, errorMsg } = retrieveVersion();
+    if (someError)
+        throw new Error(errorMsg);
+    console.log(`🔧 Version: [ ${version} ]`);
+    tagExistsInSource = !isANewTag(`v${version}-src`);
+    tagExistsInRelease = !isANewTag(`v${version}`);
+    if (!isForced && (tagExistsInSource || tagExistsInRelease))
+        throw new Error('The current version is already tagged');
+    scanOptions();
+    commitAndTag();
+    console.log(`✅ The new version [ ${version} ] was successfully released!`);
+}
+
+scriptExecutor();
+
