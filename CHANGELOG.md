@@ -23,18 +23,26 @@ This is the first stable release of `@mf-coolcode/jsutils`, providing a solid fo
 - Complete build output with `dist/index.cjs`, `dist/index.mjs`, and `dist/index.d.ts`.
 - Includes utility functions for robust and precise JavaScript validations and operations.
 
-### 📦 Installation
+### 📦 Installation  
 
 - For end-users (production), install from the `release` branch via:
 
+  - ##### With npm:
     ```bash
     npm install git+https://github.com/MicheleFranciolapilla/jsUtils.git#v1.0.0
+    ```
+
+  - ##### With yarn:
+    ```bash
     yarn add https://github.com/MicheleFranciolapilla/jsUtils.git#v1.0.0
+    ```
+
+  - ##### With pnpm:
+    ```bash
     pnpm add git+https://github.com/MicheleFranciolapilla/jsUtils.git#v1.0.0
     ```
 
 - For developers interested in source code and tests:
-  
     ```bash
     git clone -b v1.0.0-src https://github.com/MicheleFranciolapilla/jsUtils.git
     cd jsUtils && npm install
