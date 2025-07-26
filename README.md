@@ -143,6 +143,7 @@ Importable from `./types/validationOptions` (`source` branch only):
 
 - **NumberValidationOptions**
 ```ts
+interface NumberValidationOptions
 {
   allowZero?: boolean;
   allowNegatives?: boolean;
@@ -152,6 +153,7 @@ Importable from `./types/validationOptions` (`source` branch only):
 
 - **ArrayValidationOptions**
 ```ts
+interface ArrayValidationOptions
 {
   allowEmpty?: boolean;
 }
@@ -159,6 +161,7 @@ Importable from `./types/validationOptions` (`source` branch only):
 
 - **ObjectValidationOptions**
 ```ts
+interface ObjectValidationOptions
 {
   requiredProperties?: string[];
   minProperties?: number;
