@@ -1,0 +1,32 @@
+{
+  "name": "@mf-coolcode/jsutils",
+  "version": "1.0.0",
+  "description": "General-purpose JavaScript utilities with full type definitions. Tree-shakeable and compatible with CommonJS, ESM, and browser bundlers.",
+  "type": "commonjs",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "sideEffects": false,
+  "scripts": {
+    "test": "jest",
+    "build": "tsup --config tsup.config.ts"
+  },
+  "keywords": [],
+  "author": "Michele Franciolapilla",
+  "license": "ISC",
+  "packageManager": "pnpm@10.11.1",
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.0.15",
+    "jest": "^30.0.4",
+    "ts-jest": "^29.4.0",
+    "tsup": "^8.5.0",
+    "typescript": "^5.8.3"
+  }
+}
