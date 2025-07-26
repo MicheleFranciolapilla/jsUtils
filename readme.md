@@ -52,7 +52,7 @@ yarn add https://github.com/MicheleFranciolapilla/jsUtils.git#release
 ✅ Make sure to use a proper tag, e.g.:
 `#v1.0.0` → `git+https://...jsUtils.git#v1.0.0`
 <br>
-> 🔍 Looking for what changed? Check the [Changelog](https://github.com/MicheleFranciolapilla/jsUtils/blob/dev/changelog.md).
+> 🔍 Looking for what changed? Check the [Changelog](https://github.com/MicheleFranciolapilla/jsUtils/blob/dev/CHANGELOG.md).
 
 ---
 
@@ -69,14 +69,14 @@ Each build (from either `source` or `release`) generates:
 
 ## 🧠 Available Functions
 
-- **isNotNull(value): boolean**
+- **isNotNull(value): boolean**<br>
   Checks if the provided *value* is not `null`.
   ```js
     isNotNull(null); // false
     isNotNull(0);    // true
   ```
 
-- **isDefined(value, checkForNull = false): boolean**
+- **isDefined(value, checkForNull = false): boolean**<br>
   Checks if a *value* is not `undefined`, and optionally also not `null`.
   ```js
     isDefined(undefined);        // false
@@ -85,7 +85,7 @@ Each build (from either `source` or `release`) generates:
     isDefined("hello", true);    // true
   ```
 
-- **isAValidNumber(value, options?): boolean**
+- **isAValidNumber(value, options?): boolean**<br>
   Validates that a *value* is a finite number, with optional constraints: `allowZero`, `allowNegatives`, `allowDecimals`.
   ```js
     isAValidNumber(5);                              // true
@@ -94,14 +94,14 @@ Each build (from either `source` or `release`) generates:
     isAValidNumber(3.14, { allowDecimals: false }); // false
   ```
 
-- **isAValidArray(arrayToCheck, options?): boolean**
+- **isAValidArray(arrayToCheck, options?): boolean**<br>
   Checks if the input is a valid array, optionally not empty.
   ```js
     isAValidArray([]);                         // true
     isAValidArray([], { allowEmpty: false });  // false
   ```
 
-- **isAValidObjectKey(key, strict = false): boolean**
+- **isAValidObjectKey(key, strict = false): boolean**<br>
   Checks if a value is a valid object *key*.
     If `strict: true`, it must start with a letter or underscore and contain only letters, digits, underscores, or hyphens.
   ```js
@@ -111,7 +111,7 @@ Each build (from either `source` or `release`) generates:
     isAValidObjectKey('_validKey', true); // true
   ```
 
-- **isAValidObject(obj, options?): boolean**
+- **isAValidObject(obj, options?): boolean**<br>
   Validates an object by checking:
 
     - It is not an array or `null`
@@ -122,14 +122,14 @@ Each build (from either `source` or `release`) generates:
     isAValidObject({}, { minProperties: 1 });                                           // false
   ```
 
-- **cloneObject(objToClone, isStringified = false): object | null**
+- **cloneObject(objToClone, isStringified = false): object | null**<br>
   Performs a deep clone of an object using `JSON.stringify` / `parse`.
   ```js
     const original = { a: 1, b: { c: 2 } };
     const cloned = cloneObject(original); // cloned.b !== original.b
   ```
 
-- **deepFreeze(objToFreeze): unknown**
+- **deepFreeze(objToFreeze): unknown**<br>
   Recursively freezes an object or array, making it fully immutable.
   ```js
     const frozen = deepFreeze({ a: { b: [1, 2, 3] } });
@@ -247,4 +247,4 @@ Distributed under the MIT License.
 
 ## 📄 Changelog
 
-See [CHANGELOG.md](https://github.com/MicheleFranciolapilla/jsUtils/blob/dev/changelog.md) for a complete list of changes across versions.
+See [CHANGELOG.md](https://github.com/MicheleFranciolapilla/jsUtils/blob/dev/CHANGELOG.md) for a complete list of changes across versions.
