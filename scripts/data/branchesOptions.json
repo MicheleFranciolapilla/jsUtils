@@ -11,12 +11,17 @@
                                 "pnpm-lock.yaml",
                                 "tsconfig.dev.json",
                                 "tsconfig.build.json",
-                                "tsup.config.ts"
+                                "tsup.config.ts",
+                                "README.md"
                             ],
         "filesContent"  :   [
                                 {
                                     "file"      :   ".gitignore",
                                     "content"   :   "node_modules/"  
+                                },
+                                {
+                                    "file"      :   "README.md",
+                                    "content"   :   "👉 For usage instructions and changelog, visit the [ development branch ](https://github.com/MicheleFranciolapilla/jsUtils/tree/dev)."
                                 },
                                 {
                                     "file"      :   "package.json",
@@ -35,12 +40,17 @@
         "preserve"      :   [ ".git" ],
         "copy"          :   [
                                 ".gitignore",
-                                "package.json"
+                                "package.json",
+                                "README.md"
                             ],
         "filesContent"  :   [
                                 {
                                     "file"      :   ".gitignore",
                                     "content"   :   "node_modules/"  
+                                },
+                                {
+                                    "file"      :   "README.md",
+                                    "content"   :   "👉 For usage instructions and changelog, visit the [ development branch ](https://github.com/MicheleFranciolapilla/jsUtils/tree/dev)."
                                 },
                                 {
                                     "file"      :   "package.json",
