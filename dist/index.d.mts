@@ -4,16 +4,19 @@ interface NumberValidationOptions {
     allowDecimals?: boolean;
 }
 interface ArrayValidationOptions {
+    /**
+     * @deprecated Use `minItems` instead.
+     */
     allowEmpty?: boolean;
+    minItems?: number;
+    maxItems?: number;
+    uniqueItems?: boolean;
 }
 interface ObjectValidationOptions {
     requiredProperties?: string[];
     minProperties?: number;
 }
 
-/** @typedef {import('./types/validationOptions').NumberValidationOptions} NumberValidationOptions */
-/** @typedef {import('./types/validationOptions').ArrayValidationOptions} ArrayValidationOptions */
-/** @typedef {import('./types/validationOptions').ObjectValidationOptions} ObjectValidationOptions */
 /**
  * @function isNotNull
  * Checks if a value is not `null`.
@@ -42,11 +45,20 @@ declare const isDefined: (value: unknown, checkForNull?: boolean) => boolean;
 declare const isAValidNumber: (value: unknown, options?: NumberValidationOptions) => boolean;
 /**
  * @function isAValidArray
- * Checks whether the input is a valid array, optionally allowing or disallowing empty arrays.
+ * Checks whether the input is a valid array, optionally verifying minimum/maximum item count and uniqueness.
  *
- * @param {unknown} arrayToCheck - The array to validate.
- * @param {ArrayValidationOptions} [options] - Validation options.
+ * @param {unknown} arrayToCheck - The value to validate as an array.
+ * @param {ArrayValidationOptions} [options] - Optional validation rules.
+ * @param {boolean} [options.allowEmpty=true] - *(deprecated)* Whether empty arrays are allowed. Use `minItems` instead.
+ * @param {number} [options.minItems] - Minimum number of items required in the array.
+ * @param {number} [options.maxItems] - Maximum number of items allowed in the array.
+ * @param {boolean} [options.uniqueItems=false] - Whether all items in the array must be unique.
+ *
  * @returns {boolean} `true` if `arrayToCheck` is a valid array according to the rules; otherwise `false`.
+ *
+ * @example
+ * isAValidArray([1, 2, 3], { minItems: 2, maxItems: 5, uniqueItems: true });
+ * true
  */
 declare const isAValidArray: (arrayToCheck: unknown, options?: ArrayValidationOptions) => boolean;
 /**
