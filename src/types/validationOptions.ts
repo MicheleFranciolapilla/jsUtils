@@ -7,11 +7,6 @@ export interface NumberValidationOptions
 
 export interface ArrayValidationOptions 
 {
-    /**
-     * @deprecated Use `minItems` instead.
-     */
-    allowEmpty?         :   boolean;
-
     minItems?           :   number;
     maxItems?           :   number;
     uniqueItems?        :   boolean;

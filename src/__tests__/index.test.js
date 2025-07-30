@@ -47,15 +47,6 @@ describe('jsUtils', () =>
 
         describe('isAValidArray', () => 
             {
-                it('should return false for non-array input (object)', () => expect(isAValidArray({}, { allowEmpty : true })).toBe(false));
-                it('should return false for null input', () => expect(isAValidArray(null, { allowEmpty : true })).toBe(false));
-                it('should return false for empty array with allowEmpty=false', () => expect(isAValidArray([], { allowEmpty : false })).toBe(false));
-                it('should return true for empty array with allowEmpty=true', () => expect(isAValidArray([], { allowEmpty : true })).toBe(true));
-                it('should return true for non-empty array regardless of allowEmpty', () => 
-                    {
-                        expect(isAValidArray([null], { allowEmpty : true })).toBe(true);
-                        expect(isAValidArray([null], { allowEmpty : false })).toBe(true);
-                    });
                 it('should respect minItems: fail if array shorter than minItems', () => 
                     {
                         expect(isAValidArray([1], { minItems : 2 })).toBe(false);
@@ -66,8 +57,6 @@ describe('jsUtils', () =>
                         expect(isAValidArray([1, 2, 3], { maxItems : 2 })).toBe(false);
                         expect(isAValidArray([1, 2], { maxItems : 2 })).toBe(true);
                     });
-                it('should allow empty array if minItems = 0 (ignoring allowEmpty = false)', () => expect(isAValidArray([], { allowEmpty : false, minItems : 0 })).toBe(true));
-                it('should disallow empty array if minItems = 1 (ignoring allowEmpty = true)', () => expect(isAValidArray([], { allowEmpty : true, minItems : 1 })).toBe(false));
                 it('should return false if uniqueItems=true and duplicates are present', () => expect(isAValidArray([1, 2, 2, 3], { uniqueItems : true })).toBe(false));
                 it('should return true if uniqueItems=true and no duplicates', () => expect(isAValidArray([1, 2, 3], { uniqueItems : true })).toBe(true));
                 it('should handle combined options correctly', () => 

@@ -48,7 +48,6 @@ const isAValidNumber = (value : unknown, options : NumberValidationOptions = {})
  *
  * @param {unknown} arrayToCheck - The value to validate as an array.
  * @param {ArrayValidationOptions} [options] - Optional validation rules.
- * @param {boolean} [options.allowEmpty=true] - *(deprecated)* Whether empty arrays are allowed. Use `minItems` instead.
  * @param {number} [options.minItems] - Minimum number of items required in the array.
  * @param {number} [options.maxItems] - Maximum number of items allowed in the array.
  * @param {boolean} [options.uniqueItems=false] - Whether all items in the array must be unique.
@@ -61,10 +60,8 @@ const isAValidNumber = (value : unknown, options : NumberValidationOptions = {})
  */
 const isAValidArray = (arrayToCheck : unknown, options : ArrayValidationOptions = {}) : boolean => 
 {
-    if (isDefined(options.allowEmpty))
-        console.warn(`⚠️ The option [allowEmpty] is deprecated since version 1.1.0 and will be removed in version 2.0.0.`);
-    const { allowEmpty = true, uniqueItems = false } = options;
-    const minItems : number = isAValidNumber(options.minItems, { allowZero : true }) ? options.minItems! : ((!options.allowEmpty) ? 1 : 0);
+    const { uniqueItems = false } = options;
+    const minItems : number = isAValidNumber(options.minItems, { allowZero : true }) ? options.minItems! : 0;
     const maxItems : number | undefined = (isAValidNumber(options.maxItems) && (options.maxItems! >= minItems)) ? options.maxItems : undefined;
     if (!((typeof arrayToCheck === 'object') && Array.isArray(arrayToCheck)))
         return false;
@@ -99,7 +96,7 @@ const isAValidObjectKey = (key : unknown, strict = false) : boolean => ((typeof 
  */
 const isAValidObject = (objToCheck : unknown, options : ObjectValidationOptions = {}) : boolean =>
 {
-    const requiredProperties =  (isAValidArray(options?.requiredProperties, { allowEmpty : false }) && options.requiredProperties?.every( (property) => isAValidObjectKey(property, true)))
+    const requiredProperties =  (isAValidArray(options?.requiredProperties, { minItems : 1 }) && options.requiredProperties?.every( (property) => isAValidObjectKey(property, true)))
                                 ?   options.requiredProperties
                                 :   [];
     const minProperties =   isAValidNumber(options.minProperties, { allowZero : true }) ? Number(options.minProperties) : 0;
