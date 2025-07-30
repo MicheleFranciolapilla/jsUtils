@@ -1,17 +1,24 @@
 export interface NumberValidationOptions 
 {
-    allowZero?          : boolean;
-    allowNegatives?     : boolean;
-    allowDecimals?      : boolean;
+    allowZero?          :   boolean;
+    allowNegatives?     :   boolean;
+    allowDecimals?      :   boolean;
 }
 
 export interface ArrayValidationOptions 
 {
-    allowEmpty?         : boolean;
+    /**
+     * @deprecated Use `minItems` instead.
+     */
+    allowEmpty?         :   boolean;
+
+    minItems?           :   number;
+    maxItems?           :   number;
+    uniqueItems?        :   boolean;
 }
 
 export interface ObjectValidationOptions 
 {
-    requiredProperties? : string[];
-    minProperties?      : number;
+    requiredProperties? :   string[];
+    minProperties?      :   number;
 }
