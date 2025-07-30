@@ -1,0 +1,10 @@
+{
+    "extends"           :   "./tsconfig.dev.json",
+    "compilerOptions"   :   {
+                                "module"        :   "es2022",
+                                "outDir"        :   "./src/__tests__/esmTests",
+                                "rootDir"       :   "./src",
+                                "declaration"   :   false
+                            },
+    "include"           :   ["./src/utils/environmentUtils.ts"]
+}

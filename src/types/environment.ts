@@ -1,0 +1,1 @@
+export type Environments = 'node-cjs' | 'node-esm' | 'browser' | 'web-worker' | 'unknown';
