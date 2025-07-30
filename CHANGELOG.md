@@ -47,3 +47,24 @@ This is the first stable release of `@mf-coolcode/jsutils`, providing a solid fo
     git clone -b v1.0.0-src https://github.com/MicheleFranciolapilla/jsUtils.git
     cd jsUtils && npm install
     ```
+---
+
+## [v1.1.0] - 2025-07-30
+
+### ✨ Feature: extended array validation and deprecation of allowEmpty
+
+- Added new options to `isAValidArray`:
+
+  - `minItems`: minimum number of items required in the array
+
+  - `maxItems`: maximum number of items allowed in the array
+
+  - `uniqueItems`: boolean flag to require unique elements without duplicates
+
+- Deprecated the `allowEmpty` option with a console warning; it will be removed in version 2.0.0
+
+- Strengthened type and value checks, improved safety with targeted use of non-null assertion operator (`!`)
+
+- Updated types and JSDoc to reflect the new options and behaviors
+
+- Improved code readability and maintainability

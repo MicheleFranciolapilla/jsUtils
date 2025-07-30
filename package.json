@@ -1,6 +1,6 @@
 {
   "name": "@mf-coolcode/jsutils",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "General-purpose JavaScript utilities with full type definitions. Tree-shakeable and compatible with CommonJS, ESM, and browser bundlers.",
   "type": "commonjs",
   "main": "./dist/index.js",

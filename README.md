@@ -95,10 +95,13 @@ Each build (from either `source` or `release`) generates:
   ```
 
 - **isAValidArray(arrayToCheck, options?): boolean**<br>
-  Checks if the input is a valid array, optionally not empty.
+  Checks if the input is a valid array. Supports optional constraints:
   ```js
-    isAValidArray([]);                         // true
-    isAValidArray([], { allowEmpty: false });  // false
+    isAValidArray([]);                                // true
+    isAValidArray([], { minItems: 1 });               // false
+    isAValidArray([1, 2, 2], { uniqueItems: true });  // false
+    isAValidArray([1, 2], { maxItems: 1 });           // false
+    isAValidArray([], { allowEmpty: false });         // ⚠️ Deprecated
   ```
 
 - **isAValidObjectKey(key, strict = false): boolean**<br>
@@ -155,7 +158,10 @@ interface NumberValidationOptions
 ```ts
 interface ArrayValidationOptions
 {
-  allowEmpty?: boolean;
+  allowEmpty?: boolean; // Deprecated – use minItems instead
+  minItems?: number;
+  maxItems?: number;
+  uniqueItems?: boolean;
 }
 ```
 
